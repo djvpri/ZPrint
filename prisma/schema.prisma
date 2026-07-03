@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id          String    @id @default(uuid())
+  name        String
+  slug        String    @unique
+  plan        String    @default("free")
+  planExpires DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  users       User[]
+  pelanggans  Pelanggan[]
+  kategoris   KategoriProduk[]
+  orders      Order[]
+  pembayarans Pembayaran[]
+  Produk      Produk[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String
+  name      String?
+  password  String
+  role      String   @default("KASIR")
+  faceId    String?  @unique
+  tenantId  String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}
+
+model KategoriProduk {
+  id        String   @id @default(uuid())
+  nama      String
+  tenantId  String
+  createdAt DateTime @default(now())
+
+  tenant Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  produk Produk[]
+}
+
+model Produk {
+  id            String   @id @default(uuid())
+  nama          String
+  kategoriId    String
+  tenantId      String
+  hargaSatuan   Float?
+  hargaPerMeter Float?
+  hargaPerM2    Float?
+  satuan        String   @default("pcs")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  kategori  KategoriProduk @relation(fields: [kategoriId], references: [id], onDelete: Cascade)
+  tenant    Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  OrderItem OrderItem[]
+}
+
+model Pelanggan {
+  id        String   @id @default(uuid())
+  nama      String
+  noHp      String?
+  alamat    String?
+  tenantId  String
+  createdAt DateTime @default(now())
+
+  tenant Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orders Order[]
+}
+
+model Order {
+  id          String     @id @default(uuid())
+  noOrder     String     @unique
+  pelangganId String?
+  pelanggan   Pelanggan? @relation(fields: [pelangganId], references: [id])
+  tenantId    String
+  status      String     @default("DRAFT")
+  subtotal    Float
+  diskon      Float      @default(0)
+  total       Float
+  dp          Float      @default(0)
+  sisa        Float
+  catatan     String?
+  fileUrl     String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  items       OrderItem[]
+  pembayarans Pembayaran[]
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  produkId  String
+  produk    Produk   @relation(fields: [produkId], references: [id])
+  namaItem  String
+  qty       Int
+  satuan    String   @default("pcs")
+  harga     Float
+  subtotal  Float
+  createdAt DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Pembayaran {
+  id        String   @id @default(uuid())
+  orderId   String
+  tenantId  String
+  jumlah    Float
+  metode    String   @default("TUNAI")
+  tipe      String   @default("DP")
+  createdAt DateTime @default(now())
+
+  order  Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+}

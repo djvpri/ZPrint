@@ -32,7 +32,7 @@ export default function DashboardPage() {
   if (status === 'loading') return <div className="flex items-center justify-center h-full"><div className="text-gray-500">Memuat...</div></div>
   if (!session) return null
 
-  const plan = getEffectivePlan(session.user.tenantPlan, session.user.tenantPlanExpires ?? null)
+  const plan = getEffectivePlan(session.user.tenantPlan, session.user.tenantPlanExpires ? new Date(session.user.tenantPlanExpires) : null)
   const limits = getPlanLimits(plan)
   const isFree = plan === 'free'
 

@@ -1,0 +1,240 @@
+From 90650ff12480c8501c75a9a476a2326c7cb0bffc Mon Sep 17 00:00:00 2001
+From: djvpri <sentarummedia@gmail.com>
+Date: Sat, 4 Jul 2026 07:55:33 +0000
+Subject: [PATCH] feat: SSO login dari Z One via NextAuth sso provider +
+ fail-closed cross-app secret
+
+---
+ src/app/api/admin/cross-app/route.ts |  9 ++--
+ src/app/api/auth/sso-verify/route.ts | 33 -------------
+ src/app/sso/page.tsx                 | 74 ++++++++++++++++++++++++++++
+ src/auth.ts                          | 44 +++++++++++++++++
+ src/lib/secrets.ts                   | 10 ++++
+ 5 files changed, 134 insertions(+), 36 deletions(-)
+ delete mode 100644 src/app/api/auth/sso-verify/route.ts
+ create mode 100644 src/app/sso/page.tsx
+ create mode 100644 src/lib/secrets.ts
+
+diff --git a/src/app/api/admin/cross-app/route.ts b/src/app/api/admin/cross-app/route.ts
+index dbe2821..5a49620 100644
+--- a/src/app/api/admin/cross-app/route.ts
++++ b/src/app/api/admin/cross-app/route.ts
+@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
+ import { prisma } from '@/lib/prisma'
+ import { hash } from 'bcryptjs'
+ import { getEffectivePlan } from '@/lib/plan'
+-
+-const CROSS_APP_SECRET = process.env.CROSS_APP_SECRET || 'z-ecosystem-admin-2026'
++import { getCrossAppSecret } from '@/lib/secrets'
+ 
+ function checkAuth(req: NextRequest) {
+-  return req.headers.get('authorization') === `Bearer ${CROSS_APP_SECRET}`
++  try {
++    return req.headers.get('authorization') === `Bearer ${getCrossAppSecret()}`
++  } catch {
++    return false
++  }
+ }
+ 
+ export async function GET(req: NextRequest) {
+diff --git a/src/app/api/auth/sso-verify/route.ts b/src/app/api/auth/sso-verify/route.ts
+deleted file mode 100644
+index 231e053..0000000
+--- a/src/app/api/auth/sso-verify/route.ts
++++ /dev/null
+@@ -1,33 +0,0 @@
+-import { NextRequest, NextResponse } from 'next/server'
+-import { prisma } from '@/lib/prisma'
+-import { SignJWT } from 'jose'
+-
+-const CROSS_APP_SECRET = process.env.CROSS_APP_SECRET || 'z-ecosystem-admin-2026'
+-
+-export async function POST(req: NextRequest) {
+-  try {
+-    const { token, email } = await req.json()
+-    if (token !== CROSS_APP_SECRET) return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
+-    if (!email) return NextResponse.json({ error: 'email wajib' }, { status: 400 })
+-
+-    const user = await prisma.user.findFirst({
+-      where: { email, active: true },
+-      include: { tenant: true },
+-    })
+-    if (!user) return NextResponse.json({ error: 'User tidak ditemukan' }, { status: 404 })
+-
+-    const secret = new TextEncoder().encode(process.env.AUTH_SECRET || 'secret')
+-    const ssoToken = await new SignJWT({
+-      id: user.id, email: user.email, name: user.name,
+-      role: user.role, tenantId: user.tenantId,
+-      tenantSlug: user.tenant.slug, tenantPlan: user.tenant.plan,
+-    })
+-      .setProtectedHeader({ alg: 'HS256' })
+-      .setExpirationTime('5m')
+-      .sign(secret)
+-
+-    return NextResponse.json({ token: ssoToken })
+-  } catch (err) {
+-    return NextResponse.json({ error: String(err) }, { status: 500 })
+-  }
+-}
+diff --git a/src/app/sso/page.tsx b/src/app/sso/page.tsx
+new file mode 100644
+index 0000000..f85d6f0
+--- /dev/null
++++ b/src/app/sso/page.tsx
+@@ -0,0 +1,74 @@
++'use client'
++
++import { Suspense, useEffect, useState } from 'react'
++import { useSearchParams } from 'next/navigation'
++import { signIn } from 'next-auth/react'
++
++function SsoContent() {
++  const searchParams = useSearchParams()
++  const token = searchParams.get('token')
++  const [status, setStatus] = useState<'loading' | 'error'>('loading')
++  const [msg, setMsg] = useState('')
++
++  useEffect(() => {
++    if (!token) {
++      setStatus('error')
++      setMsg('Token tidak ditemukan. Buka ZPrint lewat Z One lagi.')
++      return
++    }
++
++    signIn('sso', { token, redirect: false })
++      .then((res) => {
++        if (res?.error) {
++          setStatus('error')
++          setMsg('Login SSO gagal. Pastikan akun email Anda sudah terdaftar di ZPrint, atau hubungi admin.')
++        } else {
++          // Absolute URL supaya redirect ke ZPrint sendiri,
++          // bukan ke domain Z One yang mungkin masih aktif di browser
++          window.location.replace('https://zprint.zomet.my.id/dashboard')
++        }
++      })
++      .catch(() => {
++        setStatus('error')
++        setMsg('Tidak dapat terhubung ke server ZPrint')
++      })
++  }, [token])
++
++  return (
++    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
++      <div className="text-center max-w-sm">
++        {status === 'loading' ? (
++          <>
++            <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
++            <p className="text-gray-600 text-sm">Menghubungkan akun dari Z One...</p>
++          </>
++        ) : (
++          <>
++            <div className="text-4xl mb-4">
++              <i className="bi bi-x-circle-fill text-red-500"></i>
++            </div>
++            <p className="text-red-600 font-medium mb-2">Gagal Login</p>
++            <p className="text-gray-500 text-sm mb-4">{msg}</p>
++            <a href="https://zone.zomet.my.id" className="text-blue-600 text-sm underline">
++              Kembali ke Z One
++            </a>
++          </>
++        )}
++      </div>
++    </div>
++  )
++}
++
++export default function SsoPage() {
++  return (
++    <Suspense
++      fallback={
++        <div className="min-h-screen flex items-center justify-center bg-gray-50">
++          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
++        </div>
++      }
++    >
++      <SsoContent />
++    </Suspense>
++  )
++}
+diff --git a/src/auth.ts b/src/auth.ts
+index e6f9890..ec15933 100644
+--- a/src/auth.ts
++++ b/src/auth.ts
+@@ -1,7 +1,9 @@
+ import NextAuth from 'next-auth'
+ import Credentials from 'next-auth/providers/credentials'
+ import { compare } from 'bcryptjs'
++import { jwtVerify } from 'jose'
+ import { prisma } from '@/lib/prisma'
++import { getCrossAppSecret } from '@/lib/secrets'
+ 
+ export const { handlers, auth, signIn, signOut } = NextAuth({
+   trustHost: true,
+@@ -24,6 +26,48 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
+         const valid = await compare(credentials.password as string, user.password as string)
+         if (!valid) return null
+ 
++        return {
++          id: user.id,
++          email: user.email,
++          name: user.name,
++          role: user.role,
++          tenantId: user.tenantId,
++          tenantSlug: user.tenant.slug,
++          tenantPlan: user.tenant.plan,
++          tenantPlanExpires: user.tenant.planExpires?.toISOString() ?? null,
++          faceId: user.faceId,
++        }
++      },
++    }),
++    // Login SSO dari Z One: token = JWT yang ditandatangani Z One
++    // dengan CROSS_APP_SECRET, payload { app: 'zprint', email, ... }
++    Credentials({
++      id: 'sso',
++      name: 'sso',
++      credentials: {
++        token: { label: 'Token', type: 'text' },
++      },
++      async authorize(credentials) {
++        const token = credentials?.token as string | undefined
++        if (!token) return null
++
++        let email: string
++        try {
++          const secret = new TextEncoder().encode(getCrossAppSecret())
++          const { payload } = await jwtVerify(token, secret)
++          if (payload.app !== 'zprint') return null
++          email = String(payload.email || '').trim().toLowerCase()
++          if (!email) return null
++        } catch {
++          return null
++        }
++
++        const user = await prisma.user.findFirst({
++          where: { email: { equals: email, mode: 'insensitive' }, active: true },
++          include: { tenant: true },
++        })
++        if (!user) return null
++
+         return {
+           id: user.id,
+           email: user.email,
+diff --git a/src/lib/secrets.ts b/src/lib/secrets.ts
+new file mode 100644
+index 0000000..5951b9f
+--- /dev/null
++++ b/src/lib/secrets.ts
+@@ -0,0 +1,10 @@
++// Helper fail-closed untuk secret lintas-aplikasi ekosistem Zomet.
++// Tidak ada fallback hardcoded: kalau env belum di-set, langsung error
++// supaya endpoint sensitif tidak bisa diakses dengan secret default.
++export function getCrossAppSecret(): string {
++  const secret = process.env.CROSS_APP_SECRET
++  if (!secret) {
++    throw new Error('CROSS_APP_SECRET belum di-set di environment')
++  }
++  return secret
++}
+-- 
+2.43.0
+

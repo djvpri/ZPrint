@@ -9,6 +9,8 @@ declare module 'next-auth' {
       role: string
       tenantId: string
       tenantSlug: string
+      tenantPlan: string
+      tenantPlanExpires?: string | null
       faceId?: string | null
     }
   }
@@ -17,6 +19,8 @@ declare module 'next-auth' {
     role: string
     tenantId: string
     tenantSlug: string
+    tenantPlan: string
+    tenantPlanExpires?: string | null
     faceId?: string | null
   }
 }
@@ -27,6 +31,8 @@ declare module 'next-auth/jwt' {
     role: string
     tenantId: string
     tenantSlug: string
+    tenantPlan: string
+    tenantPlanExpires?: string | null
     faceId?: string | null
   }
 }

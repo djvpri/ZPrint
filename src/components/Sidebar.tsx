@@ -74,6 +74,15 @@ export default function Sidebar() {
               <div className="px-3 py-2">
                 <p className="text-sm font-medium text-gray-900 truncate">{session.user.name || session.user.email}</p>
                 <p className="text-xs text-gray-500 truncate">{session.user.role}</p>
+                {session.user.tenantPlan && (
+                  <span className={`mt-1 inline-block text-xs font-semibold px-2 py-0.5 rounded-full ${
+                    session.user.tenantPlan === 'elite' ? 'bg-purple-100 text-purple-700' :
+                    session.user.tenantPlan === 'pro' ? 'bg-blue-100 text-blue-700' :
+                    'bg-gray-100 text-gray-500'
+                  }`}>
+                    {session.user.tenantPlan.toUpperCase()}
+                  </span>
+                )}
               </div>
             )}
             <button

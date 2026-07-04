@@ -52,6 +52,7 @@ model KategoriProduk {
 model Produk {
   id            String   @id @default(uuid())
   nama          String
+  kode          String?
   kategoriId    String
   tenantId      String
   hargaSatuan   Float?
@@ -101,16 +102,18 @@ model Order {
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
-  orderId   String
-  produkId  String
-  produk    Produk   @relation(fields: [produkId], references: [id])
-  namaItem  String
-  qty       Int
-  satuan    String   @default("pcs")
-  harga     Float
-  subtotal  Float
-  createdAt DateTime @default(now())
+  id          String   @id @default(uuid())
+  orderId     String
+  produkId    String
+  produk      Produk   @relation(fields: [produkId], references: [id])
+  namaItem    String
+  qty         Float    @default(1)
+  lebar       Float?
+  tinggi      Float?
+  satuan      String   @default("pcs")
+  hargaSatuan Float
+  subtotal    Float
+  createdAt   DateTime @default(now())
 
   order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }

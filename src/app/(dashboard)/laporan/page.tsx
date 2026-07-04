@@ -29,6 +29,7 @@ export default function LaporanPage() {
     setLoading(false)
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load() }, [])
 
   const handleChange = (b: number, t: number) => { setBulan(b); setTahun(t); load(b, t) }

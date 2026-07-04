@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
         tenantId: u.tenantId, role: u.role.toLowerCase(), active: u.active,
       })),
     })
-  } catch (err) {
+  } catch {
     return NextResponse.json({ error: 'Gagal memuat data' }, { status: 500 })
   }
 }

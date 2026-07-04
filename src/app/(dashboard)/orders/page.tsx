@@ -24,7 +24,6 @@ const STATUS_COLORS: Record<string, string> = {
 }
 
 interface Produk { id: string; nama: string; kode: string | null; hargaSatuan: number | null; hargaPerMeter: number | null; hargaPerM2: number | null; kategori: { nama: string } }
-interface KategoriProduk { id: string; nama: string }
 
 interface OrderItem {
   produkId: string
@@ -68,6 +67,7 @@ export default function OrdersPage() {
     if (r.ok) setProdukList(await r.json())
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadOrders() }, [])
 
   const handleFilterStatus = (s: string) => { setFilterStatus(s); setPage(1); loadOrders(1, s) }
@@ -195,7 +195,6 @@ export default function OrdersPage() {
               </div>
               <div className="space-y-2">
                 {items.map((item, idx) => {
-                  const p = produkList.find(x => x.id === item.produkId)
                   const isM2 = item.satuan === 'm2'
                   const isMeter = item.satuan === 'meter'
                   return (

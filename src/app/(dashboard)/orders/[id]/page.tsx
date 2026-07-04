@@ -41,6 +41,7 @@ export default function OrderDetailPage() {
     else { toast.error('Order tidak ditemukan'); router.push('/orders') }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load() }, [id])
 
   const handleStatus = async (status: string) => {

@@ -41,13 +41,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id
-        token.role = (user as any).role
-        token.tenantId = (user as any).tenantId
-        token.tenantSlug = (user as any).tenantSlug
-        token.tenantPlan = (user as any).tenantPlan
-        token.tenantPlanExpires = (user as any).tenantPlanExpires
-        token.faceId = (user as any).faceId
+        const u = user as typeof user & { role: string; tenantId: string; tenantSlug: string; tenantPlan: string; tenantPlanExpires: string | null; faceId: string | null }
+        token.id = u.id
+        token.role = u.role
+        token.tenantId = u.tenantId
+        token.tenantSlug = u.tenantSlug
+        token.tenantPlan = u.tenantPlan
+        token.tenantPlanExpires = u.tenantPlanExpires
+        token.faceId = u.faceId
       }
       if (token.email) {
         try {

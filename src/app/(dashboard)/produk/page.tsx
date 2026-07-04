@@ -46,6 +46,7 @@ export default function ProdukPage() {
     if (r.ok) setKategori(await r.json())
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { loadKategori(); loadProduk() }, [])
 
   const handleFilterKat = (v: string) => { setFilterKat(v); loadProduk(v) }

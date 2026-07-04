@@ -18,7 +18,7 @@ const handler = NextAuth({
         if (!credentials?.email || !credentials?.password) return null
 
         const user = await prisma.user.findFirst({
-          where: { email: credentials.email, active: true },
+          where: { email: credentials.email as string, active: true },
           include: { tenant: true },
         })
 
@@ -48,13 +48,17 @@ const handler = NextAuth({
         token.faceId = user.faceId
       }
       if (token.email) {
-        const dbUser = await prisma.user.findFirst({
-          where: { email: token.email as string },
-          select: { role: true, faceId: true, active: true, tenant: { select: { slug: true, plan: true, planExpires: true } } },
-        })
-        if (dbUser) {
-          token.role = dbUser.role
-          token.faceId = dbUser.faceId
+        try {
+          const dbUser = await prisma.user.findFirst({
+            where: { email: token.email as string },
+            select: { role: true, faceId: true, active: true, tenant: { select: { slug: true, plan: true, planExpires: true } } },
+          })
+          if (dbUser) {
+            token.role = dbUser.role
+            token.faceId = dbUser.faceId
+          }
+        } catch (e) {
+          console.error("JWT callback DB error:", e)
         }
       }
       return token

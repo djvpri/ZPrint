@@ -23,7 +23,7 @@ const handler = NextAuth({
         })
 
         if (!user) return null
-        const valid = await compare(credentials.password, user.password)
+        const valid = await compare(credentials.password as string, user.password as string)
         if (!valid) return null
 
         return {
@@ -47,10 +47,9 @@ const handler = NextAuth({
         token.tenantSlug = user.tenantSlug
         token.faceId = user.faceId
       }
-      // Refresh from DB
       if (token.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email },
+        const dbUser = await prisma.user.findFirst({
+          where: { email: token.email as string },
           select: { role: true, faceId: true, active: true, tenant: { select: { slug: true, plan: true, planExpires: true } } },
         })
         if (dbUser) {
@@ -74,4 +73,7 @@ const handler = NextAuth({
   secret: process.env.AUTH_SECRET,
 })
 
-export { handler as GET, handler as POST }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const GET = handler as any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const POST = handler as any

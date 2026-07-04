@@ -6,7 +6,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { useState } from 'react'
 
 const menuItems = [
-  { href: '/', label: 'Dashboard', icon: 'bi-speedometer2' },
+  { href: '/dashboard', label: 'Dashboard', icon: 'bi-speedometer2' },
   { href: '/orders', label: 'Pesanan', icon: 'bi-cart-check' },
   { href: '/produk', label: 'Produk', icon: 'bi-box-seam' },
   { href: '/pelanggan', label: 'Pelanggan', icon: 'bi-people' },
@@ -48,7 +48,7 @@ export default function Sidebar() {
       {/* Menu */}
       <nav className="flex-1 p-3 space-y-1">
         {menuItems.map((item) => {
-          const isActive = pathname === item.href
+          const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href))
           return (
             <Link
               key={item.href}

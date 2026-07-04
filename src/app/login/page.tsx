@@ -29,7 +29,7 @@ export default function LoginPage() {
       }
 
       toast.success('Login berhasil')
-      router.push('/')
+      router.push('/dashboard')
     } catch {
       toast.error('Terjadi kesalahan')
       setLoading(false)

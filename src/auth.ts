@@ -1,7 +1,9 @@
 import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
 import { compare } from 'bcryptjs'
+import { jwtVerify } from 'jose'
 import { prisma } from '@/lib/prisma'
+import { getCrossAppSecret } from '@/lib/secrets'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
@@ -23,6 +25,48 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!user) return null
         const valid = await compare(credentials.password as string, user.password as string)
         if (!valid) return null
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+          tenantId: user.tenantId,
+          tenantSlug: user.tenant.slug,
+          tenantPlan: user.tenant.plan,
+          tenantPlanExpires: user.tenant.planExpires?.toISOString() ?? null,
+          faceId: user.faceId,
+        }
+      },
+    }),
+    // Login SSO dari Z One: token = JWT yang ditandatangani Z One
+    // dengan CROSS_APP_SECRET, payload { app: 'zprint', email, ... }
+    Credentials({
+      id: 'sso',
+      name: 'sso',
+      credentials: {
+        token: { label: 'Token', type: 'text' },
+      },
+      async authorize(credentials) {
+        const token = credentials?.token as string | undefined
+        if (!token) return null
+
+        let email: string
+        try {
+          const secret = new TextEncoder().encode(getCrossAppSecret())
+          const { payload } = await jwtVerify(token, secret)
+          if (payload.app !== 'zprint') return null
+          email = String(payload.email || '').trim().toLowerCase()
+          if (!email) return null
+        } catch {
+          return null
+        }
+
+        const user = await prisma.user.findFirst({
+          where: { email: { equals: email, mode: 'insensitive' }, active: true },
+          include: { tenant: true },
+        })
+        if (!user) return null
 
         return {
           id: user.id,

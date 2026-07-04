@@ -2,11 +2,14 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hash } from 'bcryptjs'
 import { getEffectivePlan } from '@/lib/plan'
-
-const CROSS_APP_SECRET = process.env.CROSS_APP_SECRET || 'z-ecosystem-admin-2026'
+import { getCrossAppSecret } from '@/lib/secrets'
 
 function checkAuth(req: NextRequest) {
-  return req.headers.get('authorization') === `Bearer ${CROSS_APP_SECRET}`
+  try {
+    return req.headers.get('authorization') === `Bearer ${getCrossAppSecret()}`
+  } catch {
+    return false
+  }
 }
 
 export async function GET(req: NextRequest) {

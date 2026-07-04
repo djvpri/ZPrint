@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
@@ -5,7 +6,7 @@ import { PrismaClient } from "@prisma/client"
 
 const prisma = new PrismaClient()
 
-const handler = NextAuth({
+const { handlers: { GET, POST } } = NextAuth({
   providers: [
     Credentials({
       name: "credentials",
@@ -78,6 +79,4 @@ const handler = NextAuth({
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const GET = handler as any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const POST = handler as any
+export { GET, POST }

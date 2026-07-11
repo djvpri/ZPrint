@@ -42,8 +42,9 @@ export async function POST(req: NextRequest) {
 
         resetCount++
         console.log(`[DemoReset] ✅ ${tenant.name} (${tenant.id})`)
-      } catch (err: any) {
-        console.error(`[DemoReset] ❌ ${tenant.name}: ${err.message}`)
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err)
+        console.error(`[DemoReset] ❌ ${tenant.name}: ${msg}`)
       }
     }
 
@@ -53,13 +54,14 @@ export async function POST(req: NextRequest) {
       reset: resetCount,
       total: expiredDemos.length,
     })
-  } catch (error: any) {
-    console.error('[DemoResetDaily]', error.message)
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
+    console.error('[DemoResetDaily]', msg)
     return NextResponse.json({ error: 'Gagal reset demo' }, { status: 500 })
   }
 }
 
-// GET — untuk health check
+// GET — health check
 export async function GET() {
-  return NextResponse.json({ status: 'ok', service: 'zprint-demo-reset' })
+  return NextResponse.json({ status: 'ok', service: 'zprint-demo-reset-daily' })
 }

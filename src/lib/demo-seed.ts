@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import type { Produk, Pelanggan } from '@prisma/client'
 
 // ============================================
 // DEMO DATA ZPRINT — Sistem Kasir Percetakan
@@ -66,7 +67,7 @@ async function seedProducts(tenantId: string, kategoriMap: Map<string, string>) 
 }
 
 // Seed 14 hari riwayat transaksi
-async function seedOrders(tenantId: string, produkList: any[], pelangganList: any[]) {
+async function seedOrders(tenantId: string, produkList: Produk[], pelangganList: Pelanggan[]) {
   const now = new Date()
 
   for (let hari = 13; hari >= 0; hari--) {
@@ -80,11 +81,11 @@ async function seedOrders(tenantId: string, produkList: any[], pelangganList: an
       const jumlahItem = 1 + Math.floor(Math.random() * 3)
       let subtotal = 0
 
-      const items: any[] = []
+      const items: Array<{produkId: string; namaItem: string; qty: number; lebar: null; tinggi: null; satuan: string; hargaSatuan: number; subtotal: number}> = []
       const usedProduk = new Set<string>()
 
       for (let i = 0; i < jumlahItem; i++) {
-        let produk: any
+        let produk: Produk
         do {
           produk = produkList[Math.floor(Math.random() * produkList.length)]
         } while (usedProduk.has(produk.id) && usedProduk.size < produkList.length)

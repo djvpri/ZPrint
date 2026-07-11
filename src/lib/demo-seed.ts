@@ -87,12 +87,13 @@ async function seedOrders(tenantId: string, produkList: Produk[], pelangganList:
       for (let i = 0; i < jumlahItem; i++) {
         let produk: Produk
         do {
-          produk = produkList[Math.floor(Math.random() * produkList.length)]
+          produk = produkList[Math.floor(Math.random() * produkList.length)]!
         } while (usedProduk.has(produk.id) && usedProduk.size < produkList.length)
         usedProduk.add(produk.id)
 
         const qty = 1 + Math.floor(Math.random() * 10)
-        const itemSubtotal = produk.hargaSatuan * qty
+        const harga = produk.hargaSatuan ?? 0
+        const itemSubtotal = harga * qty
         subtotal += itemSubtotal
 
         items.push({
@@ -101,8 +102,8 @@ async function seedOrders(tenantId: string, produkList: Produk[], pelangganList:
           qty,
           lebar: null,
           tinggi: null,
-          satuan: produk.satuan,
-          hargaSatuan: produk.hargaSatuan,
+          satuan: produk.satuan ?? 'pcs',
+          hargaSatuan: harga,
           subtotal: itemSubtotal,
         })
       }

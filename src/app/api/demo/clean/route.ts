@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
 
     const results: { email: string; kept: string; removed: string[] }[] = []
 
-    for (const { email, _count } of dupEmails) {
+    for (const { email } of dupEmails) {
       const users = await prisma.user.findMany({
         where: { email },
         orderBy: [

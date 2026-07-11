@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
     })
 
     // Hitung data per tenant
-    const tenantStats: Record<string, any> = {}
+    const tenantStats: Record<string, { kategori: number; produk: number; pelanggan: number; pesanan: number }> = {}
     for (const t of tenants) {
       const [kategori, produk, pelanggan, pesanan] = await Promise.all([
         prisma.kategoriProduk.count({ where: { tenantId: t.id } }),

@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
     // Cari tenant demo
     const tenants = await prisma.tenant.findMany({
       where: { isDemo: true },
-      select: { id: true, slug: true, name: true, email: true, demoExpiresAt: true },
+      select: { id: true, slug: true, name: true, demoExpiresAt: true },
     })
 
     // Cari user demo di semua tenant

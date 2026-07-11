@@ -4,6 +4,25 @@ import { prisma } from '@/lib/prisma'
 import { hash } from 'bcryptjs'
 import { bersihkanDataToko, seedDataDemo } from '@/lib/demo-seed'
 
+// Hapus user duplikat (1 email = 1 user)
+async function cleanupDuplicateUsers() {
+  const dupEmails = await prisma.user.groupBy({
+    by: ['email'],
+    _count: { id: true },
+    having: { id: { _count: { gte: 2 } } },
+  })
+  for (const { email } of dupEmails) {
+    const users = await prisma.user.findMany({
+      where: { email },
+      orderBy: [{ role: 'desc' }, { createdAt: 'asc' }],
+    })
+    const [, ...remove] = users
+    for (const r of remove) {
+      await prisma.user.delete({ where: { id: r.id } })
+    }
+  }
+}
+
 // POST /api/demo/setup — setup tenant demo (butuh DEMO_RESET_SECRET)
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
@@ -13,6 +32,9 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // 0. Hapus user duplikat dulu
+    await cleanupDuplicateUsers()
+
     // 1. Cari atau buat tenant demo
     let tenant = await prisma.tenant.findUnique({ where: { slug: 'demo' } })
     if (!tenant) {

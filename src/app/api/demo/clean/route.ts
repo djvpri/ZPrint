@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic"
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// POST /api/demo/cleanup — Hapus user duplikat, sisakan 1 per email
+// POST /api/demo/clean — Hapus user duplikat, sisakan 1 per email
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
   const secret = process.env.DEMO_RESET_SECRET

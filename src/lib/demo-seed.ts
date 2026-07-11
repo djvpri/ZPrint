@@ -185,5 +185,7 @@ export async function seedDataDemo(tenantId: string) {
   // 5. Riwayat transaksi 14 hari
   await seedOrders(tenantId, produkList, pelangganResult)
 
-  return { kategori: kategoriResult.length, produk: produkList.length, pelanggan: pelangganResult.length }
+  const orderCount = await prisma.order.count({ where: { tenantId } })
+
+  return { kategori: kategoriResult.length, produk: produkList.length, pelanggan: pelangganResult.length, pesanan: orderCount }
 }

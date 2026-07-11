@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error)
-    console.error('[DemoReset]', error.message)
+    console.error('[DemoReset]', msg)
     return NextResponse.json({ error: 'Gagal reset demo' }, { status: 500 })
   }
 }

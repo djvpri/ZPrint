@@ -1,6 +1,5 @@
 import NextAuth from 'next-auth'
 import Credentials from 'next-auth/providers/credentials'
-import { compare } from 'bcryptjs'
 import { jwtVerify } from 'jose'
 import { prisma } from '@/lib/prisma'
 import { getCrossAppSecret } from '@/lib/secrets'
@@ -8,39 +7,7 @@ import { getCrossAppSecret } from '@/lib/secrets'
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
   providers: [
-    Credentials({
-      name: 'credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
-
-        const user = await prisma.user.findFirst({
-          where: { email: credentials.email as string, active: true },
-          include: { tenant: true },
-        })
-
-        if (!user) return null
-        const valid = await compare(credentials.password as string, user.password as string)
-        if (!valid) return null
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-          tenantId: user.tenantId,
-          tenantSlug: user.tenant.slug,
-          tenantPlan: user.tenant.plan,
-          tenantPlanExpires: user.tenant.planExpires?.toISOString() ?? null,
-          faceId: user.faceId,
-        }
-      },
-    }),
-    // Login SSO dari Z One: token = JWT yang ditandatangani Z One
-    // dengan CROSS_APP_SECRET, payload { app: 'zprint', email, ... }
+    // SSO-only: login via ZOne
     Credentials({
       id: 'sso',
       name: 'sso',

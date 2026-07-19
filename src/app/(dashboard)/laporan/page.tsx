@@ -39,7 +39,7 @@ export default function LaporanPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-gray-900">Laporan Keuangan</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Laporan</h1>
         <div className="flex gap-2">
           <select value={bulan} onChange={e => handleChange(Number(e.target.value), tahun)}
             className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">

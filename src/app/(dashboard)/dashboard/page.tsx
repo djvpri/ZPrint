@@ -51,58 +51,60 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <span className={`text-xs px-3 py-1 rounded-full font-semibold ${plan === 'pro' ? 'bg-blue-100 text-blue-700' : plan === 'elite' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>
-          Plan: {plan.toUpperCase()}
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
+        <span className={`text-xs px-2.5 py-1 rounded-full font-semibold ${plan === 'pro' ? 'bg-blue-100 text-blue-700' : plan === 'elite' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>
+          {plan.toUpperCase()}
         </span>
       </div>
 
       {isFree && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center justify-between">
-          <div>
-            <p className="font-semibold text-yellow-800">Anda menggunakan plan Free</p>
-            <p className="text-sm text-yellow-700">Batas {limits.ordersPerMonth} order/bulan & {limits.produk} produk. Upgrade ke Pro untuk tak terbatas.</p>
+        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="font-semibold text-yellow-800 text-sm">Plan Free</p>
+              <p className="text-xs text-yellow-700 mt-0.5">Batas {limits.ordersPerMonth} order/bulan & {limits.produk} produk.</p>
+            </div>
+            <a href="https://zomet.my.id" target="_blank" rel="noopener noreferrer"
+              className="flex-shrink-0 px-3 py-1.5 bg-yellow-500 text-white rounded-lg text-xs font-semibold hover:bg-yellow-600">
+              Upgrade
+            </a>
           </div>
-          <a href="https://zomet.my.id" target="_blank" rel="noopener noreferrer"
-            className="ml-4 px-4 py-2 bg-yellow-500 text-white rounded-lg text-sm font-semibold hover:bg-yellow-600 whitespace-nowrap">
-            Upgrade
-          </a>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {cards.map((c) => (
-          <div key={c.label} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-500">{c.label}</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">{c.value}</p>
+          <div key={c.label} className="bg-white p-4 sm:p-5 rounded-xl shadow-sm border border-gray-100">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-xs text-gray-500 leading-snug">{c.label}</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1 truncate">{c.value}</p>
               </div>
-              <div className={`p-3 rounded-lg ${colorMap[c.color]}`}>
-                <i className={`bi ${c.icon} text-xl`}></i>
+              <div className={`p-2 sm:p-2.5 rounded-lg flex-shrink-0 ${colorMap[c.color]}`}>
+                <i className={`bi ${c.icon} text-base sm:text-xl`}></i>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h2 className="font-semibold text-gray-900 mb-2">Pendapatan Bulan Ini</h2>
-          <p className="text-3xl font-bold text-green-600">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Pendapatan Bulan Ini</h2>
+          <p className="text-2xl sm:text-3xl font-bold text-green-600">
             Rp{stats?.pendapatanBulanIni.toLocaleString() ?? '—'}
           </p>
           <p className="text-sm text-gray-500 mt-1">Dari {stats?.totalOrders ?? 0} order</p>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-          <h2 className="font-semibold text-gray-900 mb-2">Selamat datang</h2>
-          <p className="text-gray-700 font-medium">{session.user.name || session.user.email}</p>
+        <div className="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base">Selamat datang</h2>
+          <p className="text-gray-700 font-medium truncate">{session.user.name || session.user.email}</p>
           <p className="text-sm text-gray-500">Role: {session.user.role}</p>
-          <p className="text-sm text-gray-500">Toko: {session.user.tenantSlug}</p>
+          <p className="text-sm text-gray-500 truncate">Toko: {session.user.tenantSlug}</p>
           {session.user.tenantPlanExpires && (
-            <p className="text-xs text-gray-400 mt-1">Plan aktif s/d {new Date(session.user.tenantPlanExpires).toLocaleDateString('id')}</p>
+            <p className="text-xs text-gray-400 mt-1">Aktif s/d {new Date(session.user.tenantPlanExpires).toLocaleDateString('id')}</p>
           )}
         </div>
       </div>

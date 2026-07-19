@@ -44,7 +44,7 @@ export default function PelangganPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Pelanggan</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Pelanggan</h1>
         <button onClick={() => { setShowForm(true); setEditing(null); setForm({ nama: '', noHp: '', alamat: '' }) }}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
           <i className="bi bi-plus-lg mr-1"></i> Tambah

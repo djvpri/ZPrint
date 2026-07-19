@@ -101,12 +101,12 @@ export default function OrderDetailPage() {
 
       <div className="max-w-2xl mx-auto space-y-4">
         <div className="flex items-center gap-3">
-          <button onClick={() => router.back()} className="text-gray-400 hover:text-gray-600"><i className="bi bi-arrow-left text-xl"></i></button>
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">{order.noOrder}</h1>
-            <p className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('id', { dateStyle: 'long' })}</p>
+          <button onClick={() => router.back()} className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg flex-shrink-0"><i className="bi bi-arrow-left text-xl"></i></button>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-900">{order.noOrder}</h1>
+            <p className="text-xs sm:text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString('id', { dateStyle: 'long' })}</p>
           </div>
-          <span className={`ml-auto text-xs px-3 py-1 rounded-full font-semibold ${STATUS_COLORS[order.status]}`}>{order.status}</span>
+          <span className={`flex-shrink-0 text-xs px-2.5 py-1 rounded-full font-semibold ${STATUS_COLORS[order.status]}`}>{order.status}</span>
         </div>
 
         {/* Info */}
@@ -188,7 +188,7 @@ export default function OrderDetailPage() {
         {order.sisa > 0 && order.status !== 'BATAL' && (
           <div className="bg-white rounded-xl border border-gray-200 p-4">
             <h2 className="font-semibold text-gray-900 mb-3">Catat Pembayaran</h2>
-            <form onSubmit={handleBayar} className="grid grid-cols-2 gap-3">
+            <form onSubmit={handleBayar} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-gray-600">Jumlah (max {fmtRp(order.sisa)})</label>
                 <input required type="number" min="1" max={order.sisa} value={bayarJumlah} onChange={e => setBayarJumlah(e.target.value)}

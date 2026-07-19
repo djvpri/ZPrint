@@ -150,9 +150,9 @@ export default function OrdersPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Pesanan</h1>
-        <button onClick={openCreate} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
-          <i className="bi bi-plus-lg mr-1"></i> Buat Pesanan
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Pesanan</h1>
+        <button onClick={openCreate} className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700">
+          <i className="bi bi-plus-lg mr-1"></i> <span className="hidden sm:inline">Buat </span>Pesanan
         </button>
       </div>
 
@@ -233,9 +233,9 @@ export default function OrdersPage() {
                           </div>
                         </>
                       )}
-                      <div className="col-span-2 md:col-span-4 flex items-center justify-between">
+                                  <div className="col-span-2 md:col-span-4 flex items-center justify-between pt-1 border-t border-gray-200">
                         <span className="text-sm font-medium text-gray-700">Subtotal: Rp{item.subtotal.toLocaleString()}</span>
-                        <button type="button" onClick={() => removeItem(idx)} className="text-red-500 text-xs hover:underline">Hapus</button>
+                        <button type="button" onClick={() => removeItem(idx)} className="text-red-500 text-xs hover:underline flex items-center gap-1"><i className="bi bi-trash" /> Hapus</button>
                       </div>
                     </div>
                   )
@@ -244,7 +244,7 @@ export default function OrdersPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-xs font-medium text-gray-600">Diskon (Rp)</label>
                 <input type="number" min="0" value={form.diskon} onChange={e => setForm(f => ({ ...f, diskon: e.target.value }))}
@@ -255,9 +255,9 @@ export default function OrdersPage() {
                 <input type="number" min="0" value={form.dp} onChange={e => setForm(f => ({ ...f, dp: e.target.value }))}
                   className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
               </div>
-              <div className="col-span-2 flex flex-col justify-end">
-                <p className="text-sm text-gray-500">Subtotal: <span className="font-medium">Rp{subtotalAll.toLocaleString()}</span></p>
-                <p className="text-base font-bold text-gray-900">Total: Rp{Math.max(0, totalFinal).toLocaleString()}</p>
+              <div className="col-span-2 bg-gray-50 rounded-lg px-3 py-2.5">
+                <p className="text-sm text-gray-500">Subtotal: <span className="font-medium text-gray-900">Rp{subtotalAll.toLocaleString()}</span></p>
+                <p className="text-base font-bold text-gray-900 mt-0.5">Total: Rp{Math.max(0, totalFinal).toLocaleString()}</p>
                 {dp > 0 && <p className="text-sm text-green-600">Sisa: Rp{Math.max(0, totalFinal - dp).toLocaleString()}</p>}
               </div>
             </div>
